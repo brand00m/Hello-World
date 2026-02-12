@@ -1,0 +1,433 @@
+\pdfoptionpdfminorversion 7
+\documentclass[openany]{memoir}
+\usepackage[space,multidot]{grffile}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage[
+	pdfauthor={Brandon McCarron},
+	pdftitle={Controls Submittal},
+	pdftex,
+	pdfusetitle,
+	pdfdisplaydoctitle=true,
+	]{hyperref}
+\usepackage{tikz}
+\usepackage[tight]{minitoc} %%no hints,
+\usepackage{xstring}
+\usepackage{datatool}
+\usepackage[left=1in,right=1in,bottom=1in,top=.5in,footskip=.8in]{geometry}
+\usepackage{etoolbox}
+\usepackage[scaled]{uarial}
+\renewcommand\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+
+\usepackage[T1]{fontenc} %Encoding to help better encode text in a pdf
+\usepackage{calc}
+\usepackage{bookmark}
+
+
+
+\definecolor{burgundy}{RGB}{140,0,26}
+\definecolor{logocolor}{RGB}{50,112,183}
+\hypersetup{
+	pdfstartpage=1,
+	pdfstartview=Fit,
+	bookmarksopen=false,
+	bookmarksdepth=3,
+	colorlinks,
+	citecolor=black,
+	filecolor=black,
+	linkcolor=black,
+	urlcolor=black
+}
+
+
+
+\tikzset{ModelForSpecs/.style={draw=black!100,
+		fill=yellow!90,
+		inner sep=.1in,
+		text=black,
+		align=left,
+		opacity=0.8,
+		rounded corners
+	}}
+\tikzset{SpecSectionInfo/.style={
+		fill=white!90,
+		text=red,
+		align=center
+	}}
+
+\newsavebox{\ChpNumBox}
+
+\makeatletter
+\newcommand*{\thickhrulefill}{%
+	\leavevmode\leaders\hrule height 1\p@ \hfill \kern \z@}
+\newcommand*\BuildChpNum[2]{%
+	\begin{tabular}[t]{@{}c@{}}
+		\makebox[0pt][c]{#1\strut} \\[.5ex]
+		\colorbox{logocolor}{%
+			\rule[-5em]{0pt}{0pt}%
+			\rule{1.5ex}{0pt}\color{black}#2\strut
+			\rule{1ex}{0pt}}%
+	\end{tabular}}
+	\makechapterstyle{BlueBox}{%
+		\renewcommand{\chapnamefont}{\large}
+		\renewcommand{\chapnumfont}{\Huge\bfseries}
+		\renewcommand{\chaptitlefont}{\raggedright\Huge\bfseries}
+		\setlength{\beforechapskip}{20pt}
+		\setlength{\midchapskip}{26pt}
+		\setlength{\afterchapskip}{40pt}
+		\renewcommand{\printchaptername}{}
+		\renewcommand{\chapternamenum}{}
+		\renewcommand{\printchapternum}{%
+			\sbox{\ChpNumBox}{%
+				\BuildChpNum{\chapnamefont\@chapapp}%
+				{\chapnumfont\thechapter}}}
+		\renewcommand{\printchapternonum}{%
+			\sbox{\ChpNumBox}{%
+				\BuildChpNum{\chapnamefont\vphantom{\@chapapp}}%
+				{\chapnumfont\hphantom{\thechapter}}}}
+		\renewcommand{\afterchapternum}{}
+		\renewcommand{\printchaptertitle}[1]{%
+			\usebox{\ChpNumBox}\hfill
+			\parbox[t]{\hsize-\wd\ChpNumBox-1em}{%
+				\vspace{\midchapskip}%
+				\thickhrulefill\par
+				\chaptitlefont ##1\par}}%
+	}
+	\chapterstyle{BlueBox}
+	
+	
+	
+	
+	\makeatletter
+	\def\usetextcolour{%
+		\ifx\tikz@textcolor\pgfutil@empty%
+		\else%
+		\pgfutil@colorlet{.}{\tikz@textcolor}%
+		\fi%
+		\pgfsetcolor{.}%
+	}
+	\makeatother
+	
+	
+	% Defining a new coordinate system for the page:
+	%
+	% --------------------------
+	% |(-1,1)    (0,1)    (1,1)|
+	% |                        |
+	% |(-1,0)    (0,0)    (1,0)|
+	% |                        |
+	% |(-1,-1)   (0,-1)  (1,-1)|
+	% --------------------------
+	\makeatletter
+	\def\parsecomma#1,#2\endparsecomma{\def\page@x{#1}\def\page@y{#2}}
+	\tikzdeclarecoordinatesystem{page}{
+		\parsecomma#1\endparsecomma
+		\pgfpointanchor{current page}{north east}
+		% Save the upper right corner
+		\pgf@xc=\pgf@x%
+		\pgf@yc=\pgf@y%
+		% save the lower left corner
+		\pgfpointanchor{current page}{south west}
+		\pgf@xb=\pgf@x%
+		\pgf@yb=\pgf@y%
+		% Transform to the correct placement
+		\pgfmathparse{(\pgf@xc-\pgf@xb)/2.*\page@x+(\pgf@xc+\pgf@xb)/2.}
+		\expandafter\pgf@x\expandafter=\pgfmathresult pt
+		\pgfmathparse{(\pgf@yc-\pgf@yb)/2.*\page@y+(\pgf@yc+\pgf@yb)/2.}
+		\expandafter\pgf@y\expandafter=\pgfmathresult pt
+	}
+	\makeatother
+	
+	\newcommand{\fakesection}[1]{%
+		\par\refstepcounter{section}% Increase section counter
+		\sectionmark{#1}% Add section mark (header)
+		\addcontentsline{toc}{section}{\numberline{}#1}% Add section to ToC
+		% Add more content here, if needed.
+	}
+	
+	
+	\newcommand{\fixName}{}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	\copypagestyle{plainnotice}{plain}
+	\makeevenfoot{plainnotice}{}{\thepage}{}% not used with "openright"
+	\makeoddfoot{plainnotice}{}{\thepage}{}
+	
+	\newcommand\myifstrequal{\expandafter\ifstrequal\expandafter}
+	
+	
+	\tikzset{CoverPageOrangeTypeset/.style={
+			inner sep=.1in,
+			text=logocolor,
+			align=flush left,
+			text width = 4 in,
+			font=\huge,
+		}}
+		\tikzset{CoverPageBlackTypeset/.style={
+				inner sep=.1in,
+				text=black,
+				align=flush left,
+				text width = 4 in,
+				font=\large,
+			}}
+			\tikzset{CoverPageDateBlackTypeset/.style={
+					inner sep=.1in,
+					text=black,
+					align=flush left,
+					text width = 4 in,
+					font=\bfseries\large,
+				}}
+				\setlength{\beforechapskip}{0pt}
+				\renewcommand\cftchaptername{TAB~}
+				
+				\setcounter{tocdepth}{0}
+				
+				%\makeatletter
+				%\renewcommand*{\@dtl@readline}[2]{%
+				  %\read#1 to #2%
+				  %\ifdefempty{#2}{%
+				    % Do nothing if empty
+				  %}{%
+				    %\dtl@trim#2%
+				  %}%
+				%}
+				%\makeatother
+				
+				\graphicspath{ {Template Files/} }
+				\renewcommand{\mtctitle}{}			
+				\begin{document}
+					\mtcsetfont{minitoc}{section}{\normalfont}
+					\DTLloadrawdb{pjdb}{"Template Files/TempProjectInformation.csv"}
+					\DTLforeach{pjdb}{%
+						\JobName=Job Name,\JobNumber=Job Number,\IndexFilePath=Index File Path,\ValveScheduleFilePath=Valve Schedule File Path,\SubmittalDate=Date,\DamperScheduleFilePath=Damper Schedule File Path,\ControlPointsListFilePath=Control Points List File Path}{%
+						\ifthenelse{\DTLcurrentindex=1}{\dtlbreak}{}
+					}
+%\newcommand{\ValveSchedule}{Valve Schedule}
+%\newcommand{\JobName}{Temecula Valley Hospital}
+%\newcommand{\IndexFilePath}{C:/Users/BMcCarron/Desktop/CSVFiles/index.csv}
+%\newcommand{\ValveScheduleFilePath}{C:/Users/BMcCarron/Desktop/Valve Schedule.pdf}
+					
+\newcommand{\PreparedByInfo}{Prepared by: \\ DMG Service and Controls \\ Southern California \\ 1110 West Taft Avenue, \\ Orange, CA 92865}
+\newcommand{\ContactInfo}{1.562.692.1277 \\ |License: 1137401 \\ dmghvac.com}
+
+
+%\newcommand{\SubmittalDate}{July 23, 2014}
+
+\renewcommand{\chaptername}{}
+
+\renewcommand{\contentsname}{\JobName}
+
+
+
+
+
+
+\bookmark[page=1,level=1]{DMG SC Building Technology Group}
+
+
+
+\thispagestyle{empty}
+\pagenumbering{roman}
+\eject \pdfpageheight=8.5in \pdfpagewidth=11in
+ {\includepdf[pages=1,fitpaper,pagecommand=%
+  {\begin{tikzpicture}[below right,remember picture,overlay]
+  \node[CoverPageOrangeTypeset] at (page cs:-.85,0) {\MakeUppercase{\large Building Technology
+  	}\newline \Huge \textbf{\MakeUppercase\JobName}};
+  \node[CoverPageBlackTypeset] at (page cs:-.85,-.25) {\PreparedByInfo};
+  \node[CoverPageBlackTypeset] at (page cs:0,-.285) {\ContactInfo};	
+  \node[CoverPageDateBlackTypeset] at (page cs:-.85,-.18) {\SubmittalDate};
+  \end{tikzpicture}}]{"Template Files/CoverPage"}}
+  
+  
+  
+  
+  
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1} 
+\eject \pdfpageheight=11in \pdfpagewidth=8.5in
+\pagestyle{plainnotice}
+\dominitoc
+\begin{tikzpicture} [remember picture,overlay,every node]
+\node[below right] at (page cs:-.35,.985)
+{\includegraphics[scale = 0.4]{Template Files/DMGSCLogo.png}};
+
+\end{tikzpicture}
+\pdfbookmark{Table of Contents}{toc}
+\tableofcontents*
+%\IndexFilePath
+%\StrSubstitute{\IndexFilePath}{ }{*}[\IndexFilePath]
+%\par
+%\IndexFilePath
+
+%\Verbdef\filename{\IndexFilePath}
+\DTLloadrawdb{myDBindex}{"\IndexFilePath"}
+\DTLforeach{myDBindex}{%
+\csvFilePath=csvFilePath,\ChapName=ChapName, \row=row}{%
+
+
+\StrSubstitute{\csvFilePath}{forwardslash}{/}[\csvFilePath]
+\StrSubstitute{\ChapName}{forwardslash}{/}[\ChapName]
+\StrSubstitute{\ChapName}{comma}{,}[\ChapName]
+
+\chapterstyle{BlueBox}
+
+
+
+\chapter{\ChapName}
+
+
+\begin{tikzpicture} [remember picture,overlay,every node]
+\node[below right] at (page cs:-.35,.95)
+{\includegraphics[scale = 0.4]{Template Files/DMGSCLogo.png}};
+
+\end{tikzpicture}
+
+
+
+\setcounter{mtc}{\row}
+
+\minitoc
+
+\clearpage
+
+\ifboolexpr{ %
+	test {\myifstrequal{\ChapName}{Valve Actuator Schedule}}
+}
+{
+\phantomsection
+\fakesection{\texorpdfstring{\normalfont\bfseries Valve Schedule \normalfont\itshape Selection Table}{Valve Schedule Selection Table}}	
+	
+	
+\pagestyle{empty}
+\eject \pdfpageheight=11in \pdfpagewidth=17in
+\includepdf[pages=-,fitpaper,pagecommand={}]{\ValveScheduleFilePath}
+\eject \pdfpageheight=11in \pdfpagewidth=8.5in
+}{}
+
+
+\ifboolexpr{ %
+	test {\myifstrequal{\ChapName}{Damper Actuator Schedule}}
+}
+{
+	\phantomsection
+	\fakesection{\texorpdfstring{\normalfont\bfseries Damper Schedule \normalfont\itshape Selection Table}{Damper Schedule Selection Table}}	
+	
+	
+	\pagestyle{empty}
+	\eject \pdfpageheight=11in \pdfpagewidth=17in
+	\includepdf[pages=-,fitpaper,pagecommand={}]{\DamperScheduleFilePath}
+	\eject \pdfpageheight=11in \pdfpagewidth=8.5in
+}{}
+%%%%%% % % % 1 FILE FOR PDF 30x42
+%%%%%%\ifboolexpr{ %
+%%%%%%	test{\myifstrequal{\ChapName}{Control Drawings}}
+%%%%%%}
+%%%%%%{
+%%%%%%\pagestyle{empty}
+%%%%%%\eject \pdfpagewidth=42in \pdfpageheight=30in
+%%%%%%\includepdf[pages=-,fitpaper,pagecommand={}]{C:/Users/BMcCarron/Desktop/PID Control Dwgs.pdf}
+%%%%%%}{}
+%%%%%% % % %
+
+\DTLloadrawdb{\csvFilePath}{"\csvFilePath"}
+\DTLforeach{\csvFilePath}{%
+\SubmittalName=LaTeX Submittal Name,\Model=Model,\Path=LaTeX File Path,\Spec=Spec}{%
+
+\renewcommand{\fixName}{%
+\saveexpandmode\expandarg\exploregroups
+
+\StrSubstitute{\SubmittalName}{newline}{\newline}[\SubmittalNameForTOC]%
+\StrSubstitute{\Model}{newline}{ \\ }[\ModelForSpecSheets]%
+\StrSubstitute{\Spec}{newline}{\newline}[\SpecSection]%
+\StrSubstitute{\Model}{ newline}{, }[\ModelForBookMark]%
+\StrSubstitute{\SubmittalNameForTOC}{normalfont boldfont}{\normalfont\bfseries}[\SubmittalNameForTOC]%
+\StrSubstitute{\SubmittalNameForTOC}{normalfont italicfont}{\normalfont\itshape}[\SubmittalNameForTOC]%
+
+
+\restoreexpandmode%
+}%
+\fixName
+
+% % % % % % ADDING SECTIONS AND HIGHLIGHTING PARTS TO PDF % % % % %
+%%%%\ifboolexpr{ %
+%%%%	test {\myifstrequal{\ChapName}{Valve Schedule}}
+%%%%	%or
+%%%%	%test {\myifstrequal{\ChapName}{Valves and Actuators}}
+%%%%	%or
+%%%%	%test {\myifstrequal{\ChapName}{Control Drawings}}
+%%%%}{}{}
+
+\phantomsection
+\fakesection{\texorpdfstring{\normalfont\bfseries\textcolor{burgundy}{\SpecSection}\SubmittalNameForTOC}{\ModelForBookMark}}
+%\nonstopmode
+%\includepdf[pages=2-,pagecommand={}]{\Path}
+
+%\ifboolexpr{ %
+%	test {\myifstrequal{\ChapName}{Control Points List}}
+%}{
+
+%\clearpage	
+%
+%\pagestyle{empty}
+%\eject \pdfpageheight=11in \pdfpagewidth=8.5in
+
+%\chapter{Control Points List}
+
+%\includepdf[pages=-,pagecommand=%
+%{\begin{tikzpicture}[remember picture,overlay,every node/.style={draw=black!100,
+%		fill=yellow!90,
+%		inner sep=.1in,
+%		text=black,
+%		align=left,
+%		rounded corners
+%	}]
+%	%\node[below right] at (page cs:-.9,.95) {\ModelForSpecSheets};
+%	\end{tikzpicture}}]{\Path}
+
+%}
+%{
+%}
+
+\ifboolexpr{ %
+	test {\myifstrequal{\ChapName}{Control Drawings}}
+}{
+
+\pagestyle{empty}
+\eject \pdfpageheight=30in \pdfpagewidth=42in
+  \includepdf[pages=-,fitpaper,pagecommand={}]{"\Path"}
+
+}
+{
+\pagestyle{plain}
+\eject \pdfpageheight=11in \pdfpagewidth=8.5in
+  \includepdf[pages=-,pagecommand=%
+  {\begin{tikzpicture}[remember picture, overlay, every node]
+  %\node[ModelForSpecs, below right] at (page cs:.9,.95) {\ModelForSpecSheets};
+  \node[ModelForSpecs, below left] at (page cs:.9,.95) {\ModelForSpecSheets};
+  \node[SpecSectionInfo, anchor=north] at (page cs:0,1) {\SpecSection};
+  \end{tikzpicture}}]{\Path}
+}
+
+}
+}
+
+%\eject \pdfpageheight=8.5in \pdfpagewidth=11in
+%\pagestyle{empty}
+%{\includepdf[pages=1,fitpaper,pagecommand=%
+%	{\begin{tikzpicture}[below right,remember picture,overlay]
+%		\node[CoverPageOrangeTypeset] at (page cs:-.85,0) {\MakeUppercase{\Huge THIS PAGE IS INTENTIONALLY LEFT BLANK}};
+%		\end{tikzpicture}}]{"Template Files/LastPage"}}
+
+\end{document}
