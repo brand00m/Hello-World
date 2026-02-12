@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vendor {
+  id            String   @id @default(uuid())
+  companyName   String   @unique @map("company_name")
+  multiplier    Decimal? @db.Decimal(5, 4)
+  contactName   String?  @map("contact_name")
+  contactEmail  String?  @map("contact_email")
+  addressLine1  String?  @map("address_line1")
+  addressLine2  String?  @map("address_line2")
+  phone         String?
+  netsuiteId    String?  @map("netsuite_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  parts Part[]
+
+  @@map("vendors")
+}
+
+model Manufacturer {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  parts Part[]
+
+  @@map("manufacturers")
+}
+
+model PartCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  parts             Part[]
+  submittalSections SubmittalSection[]
+
+  @@map("part_categories")
+}
+
+model Part {
+  id              String    @id @default(uuid())
+  description     String
+  model           String
+  manufacturerId  String?   @map("manufacturer_id")
+  vendorId        String?   @map("vendor_id")
+  categoryId      String?   @map("category_id")
+  pointType       String?   @map("point_type")
+  listPrice       Decimal?  @db.Decimal(12, 2) @map("list_price")
+  discountPrice   Decimal?  @db.Decimal(12, 2) @map("discount_price")
+  pricingDate     DateTime? @map("pricing_date") @db.Date
+  submittalName   String?   @map("submittal_name")
+  priorityRanking Int?      @map("priority_ranking")
+  specSection     String?   @map("spec_section")
+  isByOthers      Boolean   @default(false) @map("is_by_others")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  manufacturer     Manufacturer?      @relation(fields: [manufacturerId], references: [id])
+  vendor           Vendor?            @relation(fields: [vendorId], references: [id])
+  category         PartCategory?      @relation(fields: [categoryId], references: [id])
+  documents        PartDocument[]
+  bomItems         BomItem[]
+  submittalItems   SubmittalItem[]
+  pointModelMaps   PointModelMapping[]
+
+  @@map("parts")
+}
+
+model PartDocument {
+  id         String   @id @default(uuid())
+  partId     String   @map("part_id")
+  docType    String   @map("doc_type") // cut_sheet, iom, pics
+  fileName   String   @map("file_name")
+  filePath   String   @map("file_path")
+  fileSize   Int?     @map("file_size")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  part Part @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@map("part_documents")
+}
+
+model Project {
+  id            String   @id @default(uuid())
+  jobName       String   @map("job_name")
+  jobNumber     String?  @map("job_number")
+  submittalDate DateTime? @map("submittal_date") @db.Date
+  status        String   @default("draft") // draft, submitted, approved, revised
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  bomItems   BomItem[]
+  submittals Submittal[]
+
+  @@map("projects")
+}
+
+model BomItem {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  partId    String   @map("part_id")
+  quantity  Int
+  unitPrice Decimal? @db.Decimal(12, 2) @map("unit_price")
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  part    Part    @relation(fields: [partId], references: [id])
+
+  @@map("bom_items")
+}
+
+model Submittal {
+  id          String    @id @default(uuid())
+  projectId   String    @map("project_id")
+  title       String
+  status      String    @default("draft") // draft, generated, submitted, approved
+  generatedAt DateTime? @map("generated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  project  Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sections SubmittalSection[]
+
+  @@map("submittals")
+}
+
+model SubmittalSection {
+  id                   String  @id @default(uuid())
+  submittalId          String  @map("submittal_id")
+  categoryId           String? @map("category_id")
+  title                String
+  sortOrder            Int     @default(0) @map("sort_order")
+  includeValveSchedule  Boolean @default(false) @map("include_valve_schedule")
+  includeDamperSchedule Boolean @default(false) @map("include_damper_schedule")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  submittal Submittal     @relation(fields: [submittalId], references: [id], onDelete: Cascade)
+  category  PartCategory? @relation(fields: [categoryId], references: [id])
+  items     SubmittalItem[]
+
+  @@map("submittal_sections")
+}
+
+model SubmittalItem {
+  id           String   @id @default(uuid())
+  sectionId    String   @map("section_id")
+  partId       String   @map("part_id")
+  sortOrder    Int      @default(0) @map("sort_order")
+  specOverride String?  @map("spec_override")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  section SubmittalSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  part    Part             @relation(fields: [partId], references: [id])
+
+  @@map("submittal_items")
+}
+
+model PointType {
+  id               String   @id @default(uuid())
+  name             String   @unique
+  uiCount          Int      @default(0) @map("ui_count")
+  aoCount          Int      @default(0) @map("ao_count")
+  doCount          Int      @default(0) @map("do_count")
+  startupHours     Decimal? @db.Decimal(5, 2) @map("startup_hours")
+  cadHours         Decimal? @db.Decimal(5, 2) @map("cad_hours")
+  designHours      Decimal? @db.Decimal(5, 2) @map("design_hours")
+  programmingHours Decimal? @db.Decimal(5, 2) @map("programming_hours")
+  graphicsHours    Decimal? @db.Decimal(5, 2) @map("graphics_hours")
+  pmHours          Decimal? @db.Decimal(5, 2) @map("pm_hours")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  pointModelMaps PointModelMapping[]
+
+  @@map("point_types")
+}
+
+model Controller {
+  id          String  @id @default(uuid())
+  description String
+  model       String
+  uiCapacity  Int?    @map("ui_capacity")
+  uoCapacity  Int?    @map("uo_capacity")
+  aoCapacity  Int?    @map("ao_capacity")
+  boCapacity  Int?    @map("bo_capacity")
+  hasHoa      Boolean @default(false) @map("has_hoa")
+  hasMotion   Boolean @default(false) @map("has_motion")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("controllers")
+}
+
+model PointModelMapping {
+  id          String  @id @default(uuid())
+  pointTypeId String  @map("point_type_id")
+  partId      String  @map("part_id")
+  isDefault   Boolean @default(false) @map("is_default")
+  sortOrder   Int     @default(0) @map("sort_order")
+
+  pointType PointType @relation(fields: [pointTypeId], references: [id], onDelete: Cascade)
+  part      Part      @relation(fields: [partId], references: [id])
+
+  @@map("point_model_mappings")
+}
