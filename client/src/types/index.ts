@@ -64,6 +64,16 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export interface BomItem {
+  id: string;
+  projectId: string;
+  partId: string;
+  quantity: number;
+  unitPrice: number | null;
+  notes: string | null;
+  part: Part;
+}
+
 export interface Project {
   id: string;
   jobName: string;
@@ -71,4 +81,5 @@ export interface Project {
   submittalDate: string | null;
   status: string;
   _count?: { bomItems: number; submittals: number };
+  bomItems?: BomItem[];
 }

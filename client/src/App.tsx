@@ -5,6 +5,8 @@ import {
 } from '@ant-design/icons';
 import PartsLibrary from './pages/PartsLibrary';
 import VendorManagement from './pages/VendorManagement';
+import ProjectList from './pages/ProjectList';
+import ProjectDetail from './pages/ProjectDetail';
 
 const { Header, Content, Sider } = Layout;
 
@@ -39,7 +41,8 @@ function App() {
               <Route path="/" element={<Navigate to="/parts" replace />} />
               <Route path="/parts" element={<PartsLibrary />} />
               <Route path="/vendors" element={<VendorManagement />} />
-              <Route path="/projects" element={<div>Projects — Coming in Phase 2</div>} />
+              <Route path="/projects" element={<ProjectList />} />
+              <Route path="/projects/:id" element={<ProjectDetail />} />
             </Routes>
           </Content>
         </Layout>
