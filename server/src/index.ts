@@ -8,6 +8,7 @@ import { manufacturersRouter } from './routes/manufacturers';
 import { categoriesRouter } from './routes/categories';
 import { projectsRouter } from './routes/projects';
 import { uploadsRouter } from './routes/uploads';
+import { submittalsRouter } from './routes/submittals';
 
 export const prisma = new PrismaClient();
 
@@ -24,6 +25,7 @@ app.use('/api/manufacturers', manufacturersRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/projects', projectsRouter);
 app.use('/api/uploads', uploadsRouter);
+app.use('/api/submittals', submittalsRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });

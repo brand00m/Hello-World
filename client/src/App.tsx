@@ -7,6 +7,7 @@ import PartsLibrary from './pages/PartsLibrary';
 import VendorManagement from './pages/VendorManagement';
 import ProjectList from './pages/ProjectList';
 import ProjectDetail from './pages/ProjectDetail';
+import SubmittalBuilder from './pages/SubmittalBuilder';
 
 const { Header, Content, Sider } = Layout;
 
@@ -43,6 +44,7 @@ function App() {
               <Route path="/vendors" element={<VendorManagement />} />
               <Route path="/projects" element={<ProjectList />} />
               <Route path="/projects/:id" element={<ProjectDetail />} />
+              <Route path="/projects/:projectId/submittals" element={<SubmittalBuilder />} />
             </Routes>
           </Content>
         </Layout>

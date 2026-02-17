@@ -4,7 +4,7 @@ import {
   Typography, Tag, Card, Statistic, Row, Col, Select, Descriptions,
 } from 'antd';
 import {
-  PlusOutlined, DeleteOutlined, DownloadOutlined, ArrowLeftOutlined,
+  PlusOutlined, DeleteOutlined, DownloadOutlined, ArrowLeftOutlined, FileTextOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -233,6 +233,9 @@ export default function ProjectDetail() {
           <Text type="secondary">Job #{project.jobNumber || 'N/A'}</Text>
         </div>
         <Space>
+          <Button icon={<FileTextOutlined />} onClick={() => navigate(`/projects/${id}/submittals`)}>
+            Submittals
+          </Button>
           <Button icon={<DownloadOutlined />} onClick={handleExport} disabled={bomItems.length === 0}>
             Export MR
           </Button>
