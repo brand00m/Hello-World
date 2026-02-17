@@ -50,11 +50,19 @@ function parseInt_(val: unknown): number | null {
 
 function parseDate(val: unknown): Date | null {
   if (val === undefined || val === null || val === '') return null;
-  if (val instanceof Date) return isNaN(val.getTime()) ? null : val;
+  if (val instanceof Date) {
+    // Reject absurd dates (Excel serial number artifacts)
+    const year = val.getFullYear();
+    if (isNaN(val.getTime()) || year < 1990 || year > 2100) return null;
+    return val;
+  }
   const s = String(val).trim();
   if (s.toLowerCase() === 'unknown' || s === '-') return null;
   const d = new Date(s);
-  return isNaN(d.getTime()) ? null : d;
+  if (isNaN(d.getTime())) return null;
+  const year = d.getFullYear();
+  if (year < 1990 || year > 2100) return null;
+  return d;
 }
 
 function parseBool(val: unknown): boolean {
